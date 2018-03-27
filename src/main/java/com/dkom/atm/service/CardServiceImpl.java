@@ -48,15 +48,15 @@ public class CardServiceImpl implements CardService {
 
         List<PaymentCard> paymentCardList = paymentCardRepository.findCardsByCardNumber(number);
         if (paymentCardList.size() == 0){
-            logger.info("authentication cliens count = 0");
+
             return new ResponseEntity<>(HttpStatus.valueOf(401));
         }
         else if(!paymentCardList.get(0).getPassword().equals(password)){
-            logger.info("authentication wrong password");
+
             return new ResponseEntity<>(HttpStatus.valueOf(401));
         }
         else{
-            logger.info("authentication ok");
+
             return new ResponseEntity<>(HttpStatus.valueOf(200));
         }
 
@@ -72,6 +72,7 @@ public class CardServiceImpl implements CardService {
             List<PaymentCard> paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
 
             List<PaymentCard> paymentCardListDestination = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberDestination());
+
             if (paymentCardListSender.size() == 0 || paymentCardListDestination.size() == 0){
                 logger.info("Wrong data in DataTranzaction");
                 return null;  // wrong authentication        // validation
@@ -92,8 +93,10 @@ public class CardServiceImpl implements CardService {
             paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
 
             return new ResponseEntity<>(paymentCardListSender.get(0), HttpStatus.valueOf(200)) ;
+
         }
         else{
+
             return new ResponseEntity<>(responseCode.getStatusCode());
         }
     }

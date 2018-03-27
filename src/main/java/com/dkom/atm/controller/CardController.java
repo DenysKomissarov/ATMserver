@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 
@@ -26,14 +27,14 @@ public class CardController {
 
     @RequestMapping(value = "/newCard")
     @ResponseBody
-    public PaymentCard createNewCard(@RequestBody PaymentCardRequest paymentCardRequest){
+    public PaymentCard createNewCard(@Valid @RequestBody PaymentCardRequest paymentCardRequest){
 
         return cardService.createNewCard(paymentCardRequest);
     }
 
     @RequestMapping(value = "/authentication")
     @ResponseBody
-    public ResponseEntity<String> cardAuthentication(@RequestBody ClientAuthentication clientAuthentication){
+    public ResponseEntity<String> cardAuthentication(@Valid @RequestBody ClientAuthentication clientAuthentication){
 
         return cardService.cardAuthentication(clientAuthentication.getCardNumber(), clientAuthentication.getPassword());
 
@@ -41,7 +42,7 @@ public class CardController {
 
     @RequestMapping(value = "/transaction")
     @ResponseBody
-    public ResponseEntity<PaymentCard> moneyTransaction(@RequestBody DataTransaction dataTransaction) {
+    public ResponseEntity<PaymentCard> moneyTransaction(@Valid @RequestBody DataTransaction dataTransaction) {
 
         return cardService.moneyTransaction(dataTransaction);
 
