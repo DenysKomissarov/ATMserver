@@ -1,15 +1,15 @@
 package com.dkom.atm.dto;
 
-public class NamePassword {
-    private String name;
+public class ClientAuthentication {
+    private String cardNumber;
     private String password;
 
-    public String getName() {
-        return name;
+    public String getCardNumber() {
+        return cardNumber;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
     }
 
     public String getPassword() {
