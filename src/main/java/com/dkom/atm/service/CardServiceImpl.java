@@ -1,16 +1,14 @@
 package com.dkom.atm.service;
 
 import com.dkom.atm.entity.PaymentCard;
-import com.dkom.atm.entity.request.DataTransaction;
-import com.dkom.atm.entity.request.NamePassword;
-import com.dkom.atm.entity.request.PaymentCardRequest;
+import com.dkom.atm.dto.DataTransaction;
+import com.dkom.atm.dto.PaymentCardRequest;
 import com.dkom.atm.repository.PaymentCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -57,7 +55,7 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public PaymentCard moneyTransaction(DataTransaction dataTransaction) {
         String responseCode = cardAuthentication(dataTransaction.getNumberSender(), dataTransaction.getPassword());
-        if (responseCode == "200"){
+        if (responseCode.equals("200")){
             List<PaymentCard> paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
 
             List<PaymentCard> paymentCardListDestination = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberDestination());

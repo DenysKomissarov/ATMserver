@@ -1,9 +1,8 @@
 package com.dkom.atm.service;
 
 import com.dkom.atm.entity.PaymentCard;
-import com.dkom.atm.entity.request.DataTransaction;
-import com.dkom.atm.entity.request.NamePassword;
-import com.dkom.atm.entity.request.PaymentCardRequest;
+import com.dkom.atm.dto.DataTransaction;
+import com.dkom.atm.dto.PaymentCardRequest;
 
 import java.util.List;
 

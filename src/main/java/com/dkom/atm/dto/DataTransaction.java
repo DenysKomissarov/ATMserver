@@ -1,4 +1,4 @@
-package com.dkom.atm.entity.request;
+package com.dkom.atm.dto;
 
 public class DataTransaction {
     private String numberSender;
