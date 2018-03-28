@@ -51,7 +51,7 @@ public class CardController {
     @RequestMapping(value = "/getCards")
     @ResponseBody
     public List<PaymentCard> getAllCards(){
-
+        System.out.println("RequestMapping");
         return cardService.getListOfCards();
 
     }

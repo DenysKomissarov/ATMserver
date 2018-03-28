@@ -4,6 +4,7 @@ import com.dkom.atm.entity.PaymentCard;
 import com.dkom.atm.dto.DataTransaction;
 import com.dkom.atm.dto.PaymentCardRequest;
 import com.dkom.atm.repository.PaymentCardRepository;
+import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.NotAcceptableStatusException;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -36,9 +38,10 @@ public class CardServiceImpl implements CardService {
         paymentCard.setSex(paymentCardRequest.getSex());
         paymentCard.setAddress(paymentCardRequest.getAddress());
         paymentCard.setBalance(10000);
-        PaymentCard paymentCardResponce = paymentCardRepository.saveAndFlush(paymentCard);
+        paymentCard.setPassword("7777");
+        PaymentCard paymentCardResponce = paymentCardRepository.save(paymentCard);
 
-        logger.info("id : "+paymentCardResponce.getId());
+        logger.info("Thread : "+Thread.currentThread());
         return  paymentCardResponce;
     }
 
@@ -47,61 +50,45 @@ public class CardServiceImpl implements CardService {
     public ResponseEntity<String> cardAuthentication(String number, String password) {
 
         List<PaymentCard> paymentCardList = paymentCardRepository.findCardsByCardNumber(number);
+        logger.info("Size : "+paymentCardList.size());
         if (paymentCardList.size() == 0){
-
-            return new ResponseEntity<>(HttpStatus.valueOf(401));
+            throw new ServiceException("UnauthorizedException");
         }
         else if(!paymentCardList.get(0).getPassword().equals(password)){
-
-            return new ResponseEntity<>(HttpStatus.valueOf(401));
+            throw new ServiceException("UnauthorizedException");
         }
         else{
-
             return new ResponseEntity<>(HttpStatus.valueOf(200));
         }
-
     }
 
     @Override
     @Transactional
     public ResponseEntity<PaymentCard> moneyTransaction(DataTransaction dataTransaction) {
 
-        ResponseEntity<String> responseCode = cardAuthentication(dataTransaction.getNumberSender(), dataTransaction.getPassword());
+        cardAuthentication(dataTransaction.getNumberSender(), dataTransaction.getPassword());
 
-        if (responseCode.getStatusCode() == HttpStatus.valueOf(200)){
-            List<PaymentCard> paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
+        List<PaymentCard> paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
 
-            List<PaymentCard> paymentCardListDestination = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberDestination());
+        List<PaymentCard> paymentCardListDestination = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberDestination());
 
-            if (paymentCardListSender.size() == 0 || paymentCardListDestination.size() == 0){
-                logger.info("Wrong data in DataTranzaction");
-                return null;  // wrong authentication        // validation
-            }
-            if (paymentCardListSender.get(0).getBalance() < dataTransaction.getTranzactionAmount()){
-                return new ResponseEntity<>(HttpStatus.valueOf(406));
-            }
-
-            float summ = paymentCardListSender.get(0).getBalance() - dataTransaction.getTranzactionAmount();
-            paymentCardRepository.updateBalance(summ, dataTransaction.getNumberSender());
-
-            paymentCardRepository.flush();
-
-            summ = paymentCardListDestination.get(0).getBalance() + dataTransaction.getTranzactionAmount();
-            paymentCardRepository.updateBalance(summ, dataTransaction.getNumberDestination());
-            paymentCardRepository.flush();
-
-            paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
-
-            return new ResponseEntity<>(paymentCardListSender.get(0), HttpStatus.valueOf(200)) ;
-
+        if (paymentCardListSender.get(0).getBalance() < dataTransaction.getTranzactionAmount()){
+            throw new NotAcceptableStatusException("not acceptable");
         }
-        else{
 
-            return new ResponseEntity<>(responseCode.getStatusCode());
-        }
+        float summ = paymentCardListSender.get(0).getBalance() - dataTransaction.getTranzactionAmount();
+        paymentCardRepository.updateBalance(summ, dataTransaction.getNumberSender());
+
+        summ = paymentCardListDestination.get(0).getBalance() + dataTransaction.getTranzactionAmount();
+        paymentCardRepository.updateBalance(summ, dataTransaction.getNumberDestination());
+
+        paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
+
+        return new ResponseEntity<>(paymentCardListSender.get(0), HttpStatus.valueOf(200)) ;
     }
 
     @Override
+    @Transactional
     public List<PaymentCard> getListOfCards() {
 
         return paymentCardRepository.findAll(Sort.by(Sort.Order.asc("cardNumber")));

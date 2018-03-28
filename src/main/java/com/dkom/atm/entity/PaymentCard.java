@@ -1,12 +1,12 @@
 package com.dkom.atm.entity;
 
-
 import javax.persistence.*;
+import java.io.Serializable;
 
 
 @Entity
 @Table(name = "paymentcard")
-public class PaymentCard {
+public class PaymentCard implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
