@@ -17,7 +17,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
-//import javax.transaction.Transactional;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import java.util.List;
 
 @Service
@@ -26,7 +27,12 @@ public class CardServiceImpl implements CardService {
     private static final Logger logger = LoggerFactory.getLogger(CardService.class);
 
     @Autowired
-    private PaymentCardRepository paymentCardRepository;
+    PaymentCardRepository paymentCardRepository;
+
+    @Autowired
+    EntityManager entityManager;
+
+
 
 //    @Autowired
 //    public CardServiceImpl(PaymentCardRepository paymentCardRepository) {
@@ -70,6 +76,17 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public ResponseEntity<PaymentCard> moneyTransaction(DataTransaction dataTransaction) {
 
+        updateCard(dataTransaction);
+        entityManager.clear();
+
+        PaymentCard paymentCardSenderRequest = getCard(dataTransaction);
+
+        return new ResponseEntity<>(paymentCardSenderRequest, HttpStatus.valueOf(200)) ;
+    }
+
+    @Transactional
+    public void updateCard(DataTransaction dataTransaction){
+
         cardAuthentication(dataTransaction.getNumberSender(), dataTransaction.getPassword());
 
         PaymentCard paymentCardSender = paymentCardRepository.getByCardNumber(dataTransaction.getNumberSender());
@@ -85,12 +102,12 @@ public class CardServiceImpl implements CardService {
 
         summ = paymentCardDestination.getBalance() + dataTransaction.getTranzactionAmount();
         paymentCardRepository.updateBalance(summ, dataTransaction.getNumberDestination());
+    }
 
-        paymentCardRepository.flush();
+    @Transactional
+    public PaymentCard getCard(DataTransaction dataTransaction){
 
-        PaymentCard paymentCardSenderRequest = paymentCardRepository.getByCardNumber(dataTransaction.getNumberSender());
-
-        return new ResponseEntity<>(paymentCardSenderRequest, HttpStatus.valueOf(200)) ;
+        return paymentCardRepository.getByCardNumber(dataTransaction.getNumberSender());
     }
 
 
