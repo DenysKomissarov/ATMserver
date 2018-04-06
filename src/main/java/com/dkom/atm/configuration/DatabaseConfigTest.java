@@ -19,8 +19,7 @@ import java.util.Properties;
 @EntityScan(
         value = "com.dkom.atm.entity",
         basePackageClasses = Jsr310JpaConverters.class)
-public class DatabaseConfig {
-
+public class DatabaseConfigTest {
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
@@ -54,7 +53,7 @@ public class DatabaseConfig {
 
     private Properties getHibernateProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        properties.setProperty("hibernate.hbm2ddl.auto", "update");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
         return properties;
     }

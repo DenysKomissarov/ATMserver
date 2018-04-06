@@ -12,21 +12,26 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+//import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
 public class CardServiceImpl implements CardService {
 
     private static final Logger logger = LoggerFactory.getLogger(CardService.class);
-    private PaymentCardRepository paymentCardRepository;
 
     @Autowired
-    public CardServiceImpl(PaymentCardRepository paymentCardRepository) {
-        this.paymentCardRepository = paymentCardRepository;
-    }
+    private PaymentCardRepository paymentCardRepository;
+
+//    @Autowired
+//    public CardServiceImpl(PaymentCardRepository paymentCardRepository) {
+//        this.paymentCardRepository = paymentCardRepository;
+//    }
 
     @Override
     @Transactional
@@ -41,7 +46,6 @@ public class CardServiceImpl implements CardService {
         paymentCard.setPassword("7777");
         PaymentCard paymentCardResponce = paymentCardRepository.save(paymentCard);
 
-        logger.info("Thread : "+Thread.currentThread());
         return  paymentCardResponce;
     }
 
@@ -68,24 +72,27 @@ public class CardServiceImpl implements CardService {
 
         cardAuthentication(dataTransaction.getNumberSender(), dataTransaction.getPassword());
 
-        List<PaymentCard> paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
+        PaymentCard paymentCardSender = paymentCardRepository.getByCardNumber(dataTransaction.getNumberSender());
 
-        List<PaymentCard> paymentCardListDestination = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberDestination());
+        PaymentCard paymentCardDestination = paymentCardRepository.getByCardNumber(dataTransaction.getNumberDestination());
 
-        if (paymentCardListSender.get(0).getBalance() < dataTransaction.getTranzactionAmount()){
+        if (paymentCardSender.getBalance() < dataTransaction.getTranzactionAmount()){
             throw new NotAcceptableStatusException("not acceptable");
         }
 
-        float summ = paymentCardListSender.get(0).getBalance() - dataTransaction.getTranzactionAmount();
+        float summ = paymentCardSender.getBalance() - dataTransaction.getTranzactionAmount();
         paymentCardRepository.updateBalance(summ, dataTransaction.getNumberSender());
 
-        summ = paymentCardListDestination.get(0).getBalance() + dataTransaction.getTranzactionAmount();
+        summ = paymentCardDestination.getBalance() + dataTransaction.getTranzactionAmount();
         paymentCardRepository.updateBalance(summ, dataTransaction.getNumberDestination());
 
-        paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
+        paymentCardRepository.flush();
 
-        return new ResponseEntity<>(paymentCardListSender.get(0), HttpStatus.valueOf(200)) ;
+        PaymentCard paymentCardSenderRequest = paymentCardRepository.getByCardNumber(dataTransaction.getNumberSender());
+
+        return new ResponseEntity<>(paymentCardSenderRequest, HttpStatus.valueOf(200)) ;
     }
+
 
     @Override
     @Transactional

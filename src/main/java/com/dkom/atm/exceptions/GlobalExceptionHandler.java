@@ -11,6 +11,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "Authentication not valid")
