@@ -21,6 +21,7 @@ import java.util.List;
 public class CardServiceImpl implements CardService {
 
     private static final Logger logger = LoggerFactory.getLogger(CardService.class);
+
     private PaymentCardRepository paymentCardRepository;
 
     @Autowired
