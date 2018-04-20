@@ -19,17 +19,15 @@ import java.util.Properties;
 @EntityScan(
         value = "com.dkom.atm.entity",
         basePackageClasses = Jsr310JpaConverters.class)
-public class DatabaseConfig {
+public class DatabaseConfigTest {
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource());
         em.setPackagesToScan(new String[] { "com.dkom.atm.entity" });
-
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.setJpaProperties(getHibernateProperties());
-
         return em;
     }
 

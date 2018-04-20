@@ -12,7 +12,8 @@ import java.util.List;
 public interface PaymentCardRepository extends JpaRepository<PaymentCard, Long> {
 
     List<PaymentCard> findCardsByCardNumber(String number);
-    List<PaymentCard> findCardsByPassword(String password);
+
+    PaymentCard getByCardNumber(String number);
 
     @Modifying
     @Query("update PaymentCard p set p.balance = ?1 where p.cardNumber = ?2")
