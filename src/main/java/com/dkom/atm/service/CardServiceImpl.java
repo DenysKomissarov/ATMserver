@@ -12,13 +12,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.server.NotAcceptableStatusException;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -26,18 +22,12 @@ public class CardServiceImpl implements CardService {
 
     private static final Logger logger = LoggerFactory.getLogger(CardService.class);
 
-    @Autowired
-    PaymentCardRepository paymentCardRepository;
+    private PaymentCardRepository paymentCardRepository;
 
     @Autowired
-    EntityManager entityManager;
-
-
-
-//    @Autowired
-//    public CardServiceImpl(PaymentCardRepository paymentCardRepository) {
-//        this.paymentCardRepository = paymentCardRepository;
-//    }
+    public CardServiceImpl(PaymentCardRepository paymentCardRepository) {
+        this.paymentCardRepository = paymentCardRepository;
+    }
 
     @Override
     @Transactional
@@ -52,6 +42,7 @@ public class CardServiceImpl implements CardService {
         paymentCard.setPassword("7777");
         PaymentCard paymentCardResponce = paymentCardRepository.save(paymentCard);
 
+        logger.info("Thread : "+Thread.currentThread());
         return  paymentCardResponce;
     }
 
@@ -76,40 +67,26 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public ResponseEntity<PaymentCard> moneyTransaction(DataTransaction dataTransaction) {
 
-        updateCard(dataTransaction);
-        entityManager.clear();
-
-        PaymentCard paymentCardSenderRequest = getCard(dataTransaction);
-
-        return new ResponseEntity<>(paymentCardSenderRequest, HttpStatus.valueOf(200)) ;
-    }
-
-    @Transactional
-    public void updateCard(DataTransaction dataTransaction){
-
         cardAuthentication(dataTransaction.getNumberSender(), dataTransaction.getPassword());
 
-        PaymentCard paymentCardSender = paymentCardRepository.getByCardNumber(dataTransaction.getNumberSender());
+        List<PaymentCard> paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
 
-        PaymentCard paymentCardDestination = paymentCardRepository.getByCardNumber(dataTransaction.getNumberDestination());
+        List<PaymentCard> paymentCardListDestination = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberDestination());
 
-        if (paymentCardSender.getBalance() < dataTransaction.getTranzactionAmount()){
+        if (paymentCardListSender.get(0).getBalance() < dataTransaction.getTranzactionAmount()){
             throw new NotAcceptableStatusException("not acceptable");
         }
 
-        float summ = paymentCardSender.getBalance() - dataTransaction.getTranzactionAmount();
+        float summ = paymentCardListSender.get(0).getBalance() - dataTransaction.getTranzactionAmount();
         paymentCardRepository.updateBalance(summ, dataTransaction.getNumberSender());
 
-        summ = paymentCardDestination.getBalance() + dataTransaction.getTranzactionAmount();
+        summ = paymentCardListDestination.get(0).getBalance() + dataTransaction.getTranzactionAmount();
         paymentCardRepository.updateBalance(summ, dataTransaction.getNumberDestination());
+
+        paymentCardListSender = paymentCardRepository.findCardsByCardNumber(dataTransaction.getNumberSender());
+
+        return new ResponseEntity<>(paymentCardListSender.get(0), HttpStatus.valueOf(200)) ;
     }
-
-    @Transactional
-    public PaymentCard getCard(DataTransaction dataTransaction){
-
-        return paymentCardRepository.getByCardNumber(dataTransaction.getNumberSender());
-    }
-
 
     @Override
     @Transactional

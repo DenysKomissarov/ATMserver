@@ -18,14 +18,10 @@ import java.util.List;
 public class CardController {
 
     private static final Logger logger = LoggerFactory.getLogger(CardController.class);
-
     @Autowired
    private CardService cardService;
 
 
-//    public CardController(CardService cardService) {
-//        this.cardService = cardService;
-//    }
 
     @RequestMapping(value = "/newCard")
     @ResponseBody
@@ -53,6 +49,7 @@ public class CardController {
     @RequestMapping(value = "/getCards")
     @ResponseBody
     public List<PaymentCard> getAllCards(){
+        System.out.println("RequestMapping");
         return cardService.getListOfCards();
 
     }
