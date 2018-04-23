@@ -33,12 +33,6 @@ public class CardServiceImpl implements CardService {
     EntityManager entityManager;
 
 
-
-//    @Autowired
-//    public CardServiceImpl(PaymentCardRepository paymentCardRepository) {
-//        this.paymentCardRepository = paymentCardRepository;
-//    }
-
     @Override
     @Transactional
     public PaymentCard createNewCard(PaymentCardRequest paymentCardRequest) {
@@ -84,8 +78,14 @@ public class CardServiceImpl implements CardService {
         return new ResponseEntity<>(paymentCardSenderRequest, HttpStatus.valueOf(200)) ;
     }
 
+    @Override
     @Transactional
-    public void updateCard(DataTransaction dataTransaction){
+    public List<PaymentCard> getListOfCards() {
+
+        return paymentCardRepository.findAll(Sort.by(Sort.Order.asc("cardNumber")));
+    }
+
+    private void updateCard(DataTransaction dataTransaction){
 
         cardAuthentication(dataTransaction.getNumberSender(), dataTransaction.getPassword());
 
@@ -104,18 +104,10 @@ public class CardServiceImpl implements CardService {
         paymentCardRepository.updateBalance(summ, dataTransaction.getNumberDestination());
     }
 
-    @Transactional
-    public PaymentCard getCard(DataTransaction dataTransaction){
+
+    private PaymentCard getCard(DataTransaction dataTransaction){
 
         return paymentCardRepository.getByCardNumber(dataTransaction.getNumberSender());
-    }
-
-
-    @Override
-    @Transactional
-    public List<PaymentCard> getListOfCards() {
-
-        return paymentCardRepository.findAll(Sort.by(Sort.Order.asc("cardNumber")));
     }
 
 
