@@ -20,7 +20,7 @@ import java.util.Properties;
 @EntityScan(
         value = "com.dkom.atm.entity",
         basePackageClasses = Jsr310JpaConverters.class)
-public class DatabaseConfigTest {
+public class DatabaseConfig {
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {

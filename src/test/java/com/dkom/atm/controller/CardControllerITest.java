@@ -1,7 +1,7 @@
 package com.dkom.atm.controller;
 
 import com.dkom.atm.AtmApplication;
-import com.dkom.atm.configuration.DatabaseConfigTest;
+import com.dkom.atm.configuration.DatabaseConfig;
 import com.dkom.atm.dto.ClientAuthentication;
 import com.dkom.atm.dto.DataTransaction;
 import com.dkom.atm.dto.PaymentCardRequest;
@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = AtmApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(DatabaseConfigTest.class)
+@Import(DatabaseConfig.class)
 public class CardControllerITest {
 
     private TestRestTemplate testRestTemplate = new TestRestTemplate();

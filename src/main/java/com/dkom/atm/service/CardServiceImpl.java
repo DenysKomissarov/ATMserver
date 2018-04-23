@@ -70,10 +70,11 @@ public class CardServiceImpl implements CardService {
     @Transactional
     public ResponseEntity<PaymentCard> moneyTransaction(DataTransaction dataTransaction) {
 
-        updateCard(dataTransaction);
+        updateCard(dataTransaction);  //method that updates cash accounts
+
         entityManager.clear();
 
-        PaymentCard paymentCardSenderRequest = getCard(dataTransaction);
+        PaymentCard paymentCardSenderRequest = getCard(dataTransaction); //method that return client
 
         return new ResponseEntity<>(paymentCardSenderRequest, HttpStatus.valueOf(200)) ;
     }
