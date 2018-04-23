@@ -18,7 +18,6 @@ import java.util.List;
 public class CardController {
 
     private static final Logger logger = LoggerFactory.getLogger(CardController.class);
-
     @Autowired
    private CardService cardService;
 
